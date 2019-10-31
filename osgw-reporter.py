@@ -37,9 +37,14 @@ def ping_ip(ip):
             if net_name and net_name.upper() in NET_NAMES_TO_IGNORE:
                 return None, (None, None)
             else:
-                country_code = lookup['asn_country_code']
-                print(ip, country_code, net_name)
-                return ip, (country_code, net_name)
+                asn_country_code = lookup['asn_country_code']
+                country = lookup['network']['country']
+                if asn_country_code != country:
+                    print(ip, ipInfo(ip), net_name)
+                    return ip, (ipInfo(ip), net_name)
+                else:
+                    print(ip, country, net_name)
+                    return ip, (country, net_name)
         except Exception as e: # (IPDefinedError, WhoisLookupError, HTTPLookupError):
             print(f"{e}. Retrying...")
             time.sleep(5)
