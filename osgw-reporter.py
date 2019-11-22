@@ -11,6 +11,7 @@ from ipwhois.exceptions import HTTPLookupError
 import time
 
 REGEX_LOGS = r'localhost_access_log.(\d\d\d\d\-\d\d\-\d\d)'
+REGEX_LOGS_KUB = r'access.log-(\d\d\d\d\d\d\d\d)' #access.log-20191018
 IPS_TO_IGNORE = ['127.0.0.1', '131.176.']
 NET_NAMES_TO_IGNORE = ['GOOGLE', 'BAIDU', 'MSFT', 'MICROSOFT-GLOBAL-NET', 'MSFT-GFS', 'CHINANET-IDC-BJ', 'SADF', 'MICROSOFT', 'MICROSOFT-1BLK']
 
@@ -106,9 +107,11 @@ if __name__ == '__main__':
     # Traverse the log path to find the files to parse
     for log_file in os.listdir(args.logpath):
         regex = re.compile(REGEX_LOGS)
-        find_match = regex.match(log_file)
+        regex_kub = re.compile(REGEX_LOGS_KUB)
+        find_match = regex_kub.match(log_file) if regex_kub.match(log_file) else regex.match(log_file)
+        datefrmt = '%Y%m%d' if regex_kub.match(log_file) else '%Y-%m-%d'
         if find_match:
-            log_file_date = datetime.datetime.strptime(find_match.group(1), '%Y-%m-%d')
+            log_file_date = datetime.datetime.strptime(find_match.group(1), datefrmt)
             if args.start and log_file_date < args.start:
                 continue
             if args.stop and log_file_date >= args.stop:
